@@ -30,7 +30,7 @@ export default function Home({ data }) {
       </Head>
 
       <main className={styles.main}>
-        {data.map((imgUrl) => <Image src={imgUrl} width={640} height={300} />)}
+        {data.map((imgUrl) => <Image key={imgUrl} src={imgUrl} width={640} height={300} />)}
       </main>
 
       <footer className={styles.footer}>
@@ -48,34 +48,47 @@ export default function Home({ data }) {
 
 
 export async function getServerSideProps() {
-  const imagesRes = await fetch('https://ntzw8s23u0.execute-api.eu-west-2.amazonaws.com/dev/images');
-  const { data: imagesData } = await imagesRes.json();
+  try {
+    const imagesRes = await fetch('https://ntzw8s23u0.execute-api.eu-west-2.amazonaws.com/dev/images', {
+      headers: {
+        'X-API-KEY': process.env.API_KEY
+      }
+    });
+    const { data: imagesData } = await imagesRes.json();
 
-  const images = [];
-  imagesData.forEach(({ Key }) => images.push(`https://ntzw8s23u0.execute-api.eu-west-2.amazonaws.com/dev/signed-url?key=${Key}`));
+    const images = [];
+    imagesData.forEach(({ Key }) => images.push(`https://ntzw8s23u0.execute-api.eu-west-2.amazonaws.com/dev/signed-url?key=${Key}`));
 
-  // map every url to the promise of the fetch
-  const requests = images.map(url => fetch(url));
+    // map every url to the promise of the fetch
+    const requests = images.map(url => fetch(url, {
+      headers: {
+        'X-API-KEY': process.env.API_KEY
+      }
+    }));
 
-  const responses = await Promise.all(requests)
+    const responses = await Promise.all(requests)
 
-  const data = [];
-  await Promise.all(responses.map(async (r) => {
-    const json = await r.json()
+    const data = [];
+    await Promise.all(responses.map(async (r) => {
+      const json = await r.json()
 
-    data.push(json);
-  }));
+      data.push(json);
+    }));
 
-  if (!data) {
+    if (!data) {
+      throw new Error('Data not found')
+    }
+
+    return {
+      props: {
+        data
+      }, // will be passed to the page component as props
+    }
+  } catch (error) {
+    console.log('🚀 ~ file: index.js ~ line 85 ~ getServerSideProps ~ error', error);
     return {
       notFound: true,
     }
-  }
-
-  return {
-    props: {
-      data
-    }, // will be passed to the page component as props
   }
 }
 

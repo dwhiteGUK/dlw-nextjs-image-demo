@@ -24,7 +24,15 @@ const getAll = async () => {
   });
 };
 
-export async function images() {
+export async function images(event) {
+  console.log('🚀 ~ file: handler.js ~ line 28 ~ images ~ event', JSON.stringify(event, null, 2));
+
+  if (!event.headers['X-API-KEY']) {
+    return {
+      statusCode: 403
+    };
+  }
+
   const data = await getAll();
 
   return {
@@ -74,6 +82,12 @@ export const image = async () => {
 
 
 export const signedUrl = async (event) => {
+  if (!event.headers['X-API-KEY']) {
+    return {
+      statusCode: 403
+    };
+  }
+
   const { key } = event.queryStringParameters;
   const s3 = new S3({});
   const presignedGetUrl = s3.getSignedUrl('getObject', {
