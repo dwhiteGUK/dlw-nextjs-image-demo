@@ -1,65 +1,83 @@
+import { useEffect, useState } from 'react';
 import Head from 'next/head'
+import Image from 'next/image'
 import styles from '../styles/Home.module.css'
 
-export default function Home() {
+export default function Home({ data }) {
+  // const [imageUrl, setImage] = useState();
+
+  // useEffect(() => {
+  //   const fetchImage = async () => {
+  //     const imagesRes = await fetch('https://ntzw8s23u0.execute-api.eu-west-2.amazonaws.com/dev/images');
+  //     console.log('🚀 ~ file: index.js ~ line 12 ~ fetchImage ~ imagesRes', imagesRes)
+  //     const { data: imagesData } = await imagesRes.json();
+
+  //     const images = [];
+  //     imagesData.forEach(({ Key }) => images.push(`https://ntzw8s23u0.execute-api.eu-west-2.amazonaws.com/dev/signed-url?key=${Key}`));
+
+  //     console.log('🚀 ~ file: index.js ~ line 12 ~ fetchImage ~ images', images);
+
+  //   }
+
+  //   fetchImage();
+  // }, []);
+
   return (
     <div className={styles.container}>
       <Head>
-        <title>Create Next App</title>
+        <title>dlw Nextjs image demo</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
       <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
-
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
-
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className={styles.card}
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/import?filter=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
+        {data.map((imgUrl) => <Image src={imgUrl} width={640} height={300} />)}
       </main>
 
       <footer className={styles.footer}>
         <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
+          href="https://darrenwhite.dev"
           target="_blank"
           rel="noopener noreferrer"
         >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
+          Demo by darrenwhite.dev
         </a>
       </footer>
     </div>
   )
 }
+
+
+export async function getServerSideProps() {
+  const imagesRes = await fetch('https://ntzw8s23u0.execute-api.eu-west-2.amazonaws.com/dev/images');
+  const { data: imagesData } = await imagesRes.json();
+
+  const images = [];
+  imagesData.forEach(({ Key }) => images.push(`https://ntzw8s23u0.execute-api.eu-west-2.amazonaws.com/dev/signed-url?key=${Key}`));
+
+  // map every url to the promise of the fetch
+  const requests = images.map(url => fetch(url));
+
+  const responses = await Promise.all(requests)
+
+  const data = [];
+  await Promise.all(responses.map(async (r) => {
+    const json = await r.json()
+
+    data.push(json);
+  }));
+
+  if (!data) {
+    return {
+      notFound: true,
+    }
+  }
+
+  return {
+    props: {
+      data
+    }, // will be passed to the page component as props
+  }
+}
+
+
+

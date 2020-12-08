@@ -1,0 +1,64 @@
+service: dlw-nextjs-aws-image-demo
+# app and org for use with dashboard.serverless.com
+#app: your-app-name
+# org: dlw
+
+# You can pin your service to only deploy with a specific Serverless version
+# Check out our docs for more details
+frameworkVersion: "2"
+
+# Create an optimized package for our functions
+package:
+  individually: true
+
+plugins:
+  - serverless-bundle # Package our functions with Webpack
+  - serverless-pseudo-parameters
+
+custom:
+  upload: blog-nextjs-image-demo
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  stage: dev
+  region: eu-west-2
+
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - s3:ListBucket
+      Resource: "arn:aws:s3:::${opt:stage, self:provider.stage, 'dev'}-${self:custom.upload}"
+    - Effect: Allow
+      Action:
+        - s3:GetObject
+      Resource: "arn:aws:s3:::${opt:stage, self:provider.stage, 'dev'}-${self:custom.upload}/*"
+
+functions:
+  images:
+    handler: handler.images
+    events:
+      - http:
+          path: images
+          method: get
+          cors: true
+  image:
+    handler: handler.image
+    events:
+      - http:
+          path: image
+          method: get
+          cors: true
+  signedUrl:
+    handler: handler.signedUrl
+    events:
+      - http:
+          path: signed-url
+          method: get
+          cors: true
+resources:
+  Resources:
+    S3BucketOutputs:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: "${opt:stage, self:provider.stage, 'dev'}-${self:custom.upload}"
