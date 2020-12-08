@@ -25,9 +25,9 @@ const getAll = async () => {
 };
 
 export async function images(event) {
-  console.log('🚀 ~ file: handler.js ~ line 28 ~ images ~ event', JSON.stringify(event, null, 2));
+  console.log(event.headers['X-API-KEY'], process.env.API_KEY);
 
-  if (!event.headers['X-API-KEY']) {
+  if (event.headers['X-API-KEY'] !== process.env.API_KEY) {
     return {
       statusCode: 403
     };
@@ -66,7 +66,15 @@ const getImage = async (Key) => {
   });
 };
 
-export const image = async () => {
+export const image = async (event) => {
+  console.log(event.headers['X-API-KEY'], process.env.API_KEY);
+
+  if (event.headers['X-API-KEY'] !== process.env.API_KEY) {
+    return {
+      statusCode: 403
+    };
+  }
+
   const data = await getImage('altanbagana-jargal-_eMbrsvO7jc-unsplash.jpg');
   return {
     statusCode: 200,
@@ -82,7 +90,9 @@ export const image = async () => {
 
 
 export const signedUrl = async (event) => {
-  if (!event.headers['X-API-KEY']) {
+  console.log(event.headers['X-API-KEY'], process.env.API_KEY);
+
+  if (event.headers['X-API-KEY'] !== process.env.API_KEY) {
     return {
       statusCode: 403
     };

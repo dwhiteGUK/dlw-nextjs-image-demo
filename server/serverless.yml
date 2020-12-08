@@ -14,9 +14,12 @@ package:
 plugins:
   - serverless-bundle # Package our functions with Webpack
   - serverless-pseudo-parameters
+  - serverless-dotenv-plugin
 
 custom:
   upload: blog-nextjs-image-demo
+  dotenv:
+    path: ../.env
 
 provider:
   name: aws
