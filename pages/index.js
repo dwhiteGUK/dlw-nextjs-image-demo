@@ -47,7 +47,7 @@ export default function Home({ data }) {
 }
 
 
-export async function getServerSideProps() {
+export async function getStaticProps() {
   try {
     const imagesRes = await fetch('https://ntzw8s23u0.execute-api.eu-west-2.amazonaws.com/dev/images', {
       headers: {

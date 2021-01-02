@@ -1,7 +1,7 @@
-import AWS from 'aws-sdk';
+import { S3 } from 'aws-sdk';
 
-const { S3 } = AWS;
-const Bucket = 'dev-blog-nextjs-image-demo';
+const Bucket = process.env.BUCKET_NAME;
+console.log('🚀 ~ Bucket Name', Bucket);
 
 const getAll = async () => {
   const s3 = new S3({});
@@ -90,8 +90,6 @@ export const image = async (event) => {
 
 
 export const signedUrl = async (event) => {
-  console.log(event.headers['X-API-KEY'], process.env.API_KEY);
-
   if (event.headers['X-API-KEY'] !== process.env.API_KEY) {
     return {
       statusCode: 403
@@ -100,7 +98,7 @@ export const signedUrl = async (event) => {
 
   const { key } = event.queryStringParameters;
   const s3 = new S3({});
-  const presignedGetUrl = s3.getSignedUrl('getObject', {
+  const presignedGetUrl = await s3.getSignedUrl('getObject', {
     Bucket,
     Key: key,
     Expires: 60 * 5 // time to expire in seconds 5

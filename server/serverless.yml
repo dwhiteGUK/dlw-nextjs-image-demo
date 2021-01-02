@@ -40,6 +40,8 @@ provider:
 functions:
   images:
     handler: handler.images
+    environment:
+      BUCKET_NAME: ${opt:stage, self:provider.stage, 'dev'}-${self:custom.upload}
     events:
       - http:
           path: images
@@ -54,6 +56,8 @@ functions:
           cors: true
   signedUrl:
     handler: handler.signedUrl
+    environment:
+      BUCKET_NAME: ${opt:stage, self:provider.stage, 'dev'}-${self:custom.upload}
     events:
       - http:
           path: signed-url
