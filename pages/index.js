@@ -46,27 +46,24 @@ export default function Home({ data }) {
   )
 }
 
-
 export async function getServerSideProps() {
   try {
-    const imagesRes = await fetch('https://ntzw8s23u0.execute-api.eu-west-2.amazonaws.com/dev/images', {
+    const options = {
       headers: {
         'X-API-KEY': process.env.API_KEY
       }
-    });
+    }
+
+    const imagesRes = await fetch('https://ntzw8s23u0.execute-api.eu-west-2.amazonaws.com/dev/images', options);
     const { data: imagesData } = await imagesRes.json();
 
     const images = [];
     imagesData.forEach(({ Key }) => images.push(`https://ntzw8s23u0.execute-api.eu-west-2.amazonaws.com/dev/signed-url?key=${Key}`));
 
     // map every url to the promise of the fetch
-    const requests = images.map(url => fetch(url, {
-      headers: {
-        'X-API-KEY': process.env.API_KEY
-      }
-    }));
+    const requests = images.map(url => fetch(url, options));
 
-    const responses = await Promise.all(requests)
+    const responses = await Promise.all(requests);
 
     const data = [];
     await Promise.all(responses.map(async (r) => {
@@ -85,7 +82,6 @@ export async function getServerSideProps() {
       }, // will be passed to the page component as props
     }
   } catch (error) {
-    console.log('🚀 ~ file: index.js ~ line 85 ~ getServerSideProps ~ error', error);
     return {
       notFound: true,
     }
