@@ -54,11 +54,11 @@ export async function getServerSideProps() {
       }
     }
 
-    const imagesRes = await fetch('https://ntzw8s23u0.execute-api.eu-west-2.amazonaws.com/dev/images', options);
+    const imagesRes = await fetch('https://rk41tqnpyd.execute-api.eu-west-2.amazonaws.com/dev/images', options);
     const { data: imagesData } = await imagesRes.json();
 
     const images = [];
-    imagesData.forEach(({ Key }) => images.push(`https://ntzw8s23u0.execute-api.eu-west-2.amazonaws.com/dev/signed-url?key=${Key}`));
+    imagesData.forEach(({ Key }) => images.push(`https://rk41tqnpyd.execute-api.eu-west-2.amazonaws.com/dev/signed-url?key=${Key}`));
 
     // map every url to the promise of the fetch
     const requests = images.map(url => fetch(url, options));
